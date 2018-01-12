@@ -34,7 +34,7 @@ class FeedDrawView: UIView {
             let urlString = imageData.imageUrl
             if let image = imageData.image {
                 drawImage = image
-            } else if let image = YYImageCache.shared().getImageForKey(urlString) {
+            } else if let image = YYImageCache.shared().getImageForKey(urlString + "dd") {
                 drawImage = image
                 model.drawModel.imageDatas[i].image = image
             } else {
@@ -42,7 +42,7 @@ class FeedDrawView: UIView {
                     if url.absoluteString == self.model?.drawModel.imageDatas[i].imageUrl {
                         if error == nil && image != nil {
                             let tempImage = image!.yy_imageByResize(to: imageData.imageRect.size)
-                            YYImageCache.shared().setImage(tempImage!, forKey: urlString)
+                            YYImageCache.shared().setImage(tempImage!, forKey: urlString + "dd")
                             drawImage = tempImage
                             model.drawModel.imageDatas[i].image = tempImage
                             self.setNeedsDisplay()
@@ -58,5 +58,44 @@ class FeedDrawView: UIView {
                 context.draw(placeholder!.cgImage!, in: imageData.imageRect)
             }
         }
+    }
+}
+
+extension FeedDrawView {
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        
+        guard let touch = touches.first else { return }
+        let touchPoint = touch.location(in: self)
+        
+        if let imageUrlString = imageHitTest(touchPoint) {
+            showImagePreview(imageUrlString)
+        } else {
+            
+        }
+    }
+    
+    
+    private func imageHitTest(_ hitPoint: CGPoint) -> String? {
+        guard let model = model else { return nil}
+        for model in model.drawModel.imageDatas {
+            let imageScreenRect = fetchImageScreenRect(model.imageRect)
+            if imageScreenRect.contains(hitPoint) {
+                return model.imageUrl
+            }
+        }
+        return nil
+    }
+    
+    private func showImagePreview(_ imageUrlString: String) {
+        if let image = YYImageCache.shared().getImageForKey(imageUrlString) {
+            let preview = ImagePreviewView(frame: UIScreen.main.bounds)
+            preview.setImage(image)
+            UIApplication.shared.keyWindow?.addSubview(preview)
+        }
+    }
+    
+    // 将图片坐标转为相对屏幕的坐标
+    private func fetchImageScreenRect(_ inContextRect: CGRect) -> CGRect {
+        return CGRect(origin: CGPoint(x: inContextRect.minX, y: bounds.height - inContextRect.height - inContextRect.minY), size: inContextRect.size)
     }
 }

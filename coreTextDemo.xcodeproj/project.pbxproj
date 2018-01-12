@@ -39,6 +39,7 @@
 		CB596E8E1FFBA03D00E1A64C /* YYImageCache.m in Sources */ = {isa = PBXBuildFile; fileRef = CB596E791FFBA03C00E1A64C /* YYImageCache.m */; };
 		CB596E8F1FFBA03D00E1A64C /* YYWebImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CB596E7C1FFBA03C00E1A64C /* YYWebImageManager.m */; };
 		CB596E901FFBA03D00E1A64C /* YYWebImageOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = CB596E7E1FFBA03D00E1A64C /* YYWebImageOperation.m */; };
+		CB6582F420088F290014AC2B /* ImagePreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB6582F320088F290014AC2B /* ImagePreviewView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -98,6 +99,7 @@
 		CB596E7D1FFBA03D00E1A64C /* YYWebImageOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YYWebImageOperation.h; sourceTree = "<group>"; };
 		CB596E7E1FFBA03D00E1A64C /* YYWebImageOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YYWebImageOperation.m; sourceTree = "<group>"; };
 		CB596E941FFBA49C00E1A64C /* Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Header.h; sourceTree = "<group>"; };
+		CB6582F320088F290014AC2B /* ImagePreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePreviewView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -180,6 +182,7 @@
 				CB596E4A1FF6338000E1A64C /* FeedView.swift */,
 				CB596E481FF6338000E1A64C /* FeedCell.swift */,
 				CB596E491FF6338000E1A64C /* FeedDrawView.swift */,
+				CB6582F320088F290014AC2B /* ImagePreviewView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -403,6 +406,7 @@
 				CB596E2C1FF62BE900E1A64C /* ViewController.swift in Sources */,
 				CB596E4D1FF6338000E1A64C /* FeedDrawView.swift in Sources */,
 				CB596E4C1FF6338000E1A64C /* FeedCell.swift in Sources */,
+				CB6582F420088F290014AC2B /* ImagePreviewView.swift in Sources */,
 				CB596E7F1FFBA03D00E1A64C /* YYCache.m in Sources */,
 				CB596E861FFBA03D00E1A64C /* UIButton+YYWebImage.m in Sources */,
 				CB596E2A1FF62BE900E1A64C /* AppDelegate.swift in Sources */,
