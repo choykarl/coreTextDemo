@@ -22,7 +22,6 @@ class ImagePreviewView: UIView {
     func setImage(_ image: UIImage) {
         imageView.frame = CGRect(origin: CGPoint(x: (bounds.width - image.size.width) / 2, y: (bounds.height - image.size.height) / 2), size: image.size)
         imageView.image = image
-        print("imageSize = \(image.size)")
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {

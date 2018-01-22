@@ -154,12 +154,12 @@ extension ViewController {
                 let bounds = CGRect(x: x, y: y, width: width, height: height)
                 
                 let path = CTFrameGetPath(frame)
-                let colRect = path.boundingBox
-                bounds.offsetBy(dx: colRect.minX, dy: colRect.minY)
+                let pathRect = path.boundingBox
+                let imageBounds = bounds.offsetBy(dx: pathRect.minX, dy: pathRect.minY)
                 
                 let model = ImageDataModel()
                 model.imageUrl = imageUrl
-                model.imageRect = bounds
+                model.imageRect = imageBounds
                 models.append(model)
             }
         }
