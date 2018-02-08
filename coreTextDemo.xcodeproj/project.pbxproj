@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		B5BA4E745C2503E184762F77 /* Pods_coreTextDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52DC1477937CEFDFFCD1D89A /* Pods_coreTextDemo.framework */; };
-		CB1662AF1FFC7C3600B190C7 /* coreText.gif in Resources */ = {isa = PBXBuildFile; fileRef = CB1662AE1FFC7C3600B190C7 /* coreText.gif */; };
 		CB596E2A1FF62BE900E1A64C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB596E291FF62BE900E1A64C /* AppDelegate.swift */; };
 		CB596E2C1FF62BE900E1A64C /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB596E2B1FF62BE900E1A64C /* ViewController.swift */; };
 		CB596E2F1FF62BE900E1A64C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CB596E2D1FF62BE900E1A64C /* Main.storyboard */; };
@@ -46,7 +45,6 @@
 		52DC1477937CEFDFFCD1D89A /* Pods_coreTextDemo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_coreTextDemo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6CDF562CE25316DEF3A9E1C0 /* Pods-coreTextDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-coreTextDemo.debug.xcconfig"; path = "Pods/Target Support Files/Pods-coreTextDemo/Pods-coreTextDemo.debug.xcconfig"; sourceTree = "<group>"; };
 		92D16EA23895D42B8884D504 /* Pods-coreTextDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-coreTextDemo.release.xcconfig"; path = "Pods/Target Support Files/Pods-coreTextDemo/Pods-coreTextDemo.release.xcconfig"; sourceTree = "<group>"; };
-		CB1662AE1FFC7C3600B190C7 /* coreText.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = coreText.gif; sourceTree = "<group>"; };
 		CB596E261FF62BE900E1A64C /* coreTextDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = coreTextDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB596E291FF62BE900E1A64C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		CB596E2B1FF62BE900E1A64C /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -159,7 +157,6 @@
 				CB596E291FF62BE900E1A64C /* AppDelegate.swift */,
 				CB596E2D1FF62BE900E1A64C /* Main.storyboard */,
 				CB596E301FF62BE900E1A64C /* Assets.xcassets */,
-				CB1662AE1FFC7C3600B190C7 /* coreText.gif */,
 				CB596E321FF62BE900E1A64C /* LaunchScreen.storyboard */,
 				CB596E351FF62BE900E1A64C /* Info.plist */,
 				CB596E541FFB658500E1A64C /* dataSource.plist */,
@@ -331,7 +328,6 @@
 				CB596E551FFB658500E1A64C /* dataSource.plist in Resources */,
 				CB596E311FF62BE900E1A64C /* Assets.xcassets in Resources */,
 				CB596E2F1FF62BE900E1A64C /* Main.storyboard in Resources */,
-				CB1662AF1FFC7C3600B190C7 /* coreText.gif in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

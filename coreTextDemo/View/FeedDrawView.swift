@@ -16,16 +16,22 @@ class FeedDrawView: UIView {
             setNeedsDisplay()
         }
     }
+    weak var context: CGContext?
+    private var selectedRects = [CGRect]()
+    private var selectedEnd = false
     
     override func draw(_ rect: CGRect) {
         UIColor.white.setFill()
         UIRectFill(rect)
         guard let model = model else { return }
         guard let context = UIGraphicsGetCurrentContext() else { return }
+        self.context = context
         
         context.textMatrix = CGAffineTransform.identity
         context.translateBy(x: 0, y: self.bounds.height)
         context.scaleBy(x: 1, y: -1)
+        
+        drawTouchBackground()
         
         if let frame = model.drawModel.frame {
             CTFrameDraw(frame, context)
@@ -62,11 +68,37 @@ class FeedDrawView: UIView {
             }
         }
     }
+    
+    private func drawTouchBackground() {
+        for (i, r) in selectedRects.enumerated() {
+            var path: UIBezierPath!
+            if selectedRects.count == 1 {
+                path = UIBezierPath(roundedRect: r, byRoundingCorners: .allCorners, cornerRadii: CGSize(width: r.height / 2, height: r.height / 2))
+            } else {
+                if i == 0 {
+                    path = UIBezierPath(roundedRect: r, byRoundingCorners: [.topLeft, .bottomLeft], cornerRadii: CGSize(width: r.height / 2, height: r.height / 2))
+                } else if i == selectedRects.count - 1 {
+                    path = UIBezierPath(roundedRect: r, byRoundingCorners: [.topRight, .bottomRight], cornerRadii: CGSize(width: r.height / 2, height: r.height / 2))
+                } else {
+                    path = UIBezierPath(rect: r)
+                }
+            }
+            if selectedEnd {
+                UIColor.clear.setFill()
+            } else {
+                UIColor.red.setFill()
+            }
+            path.fill()
+        }
+        if selectedEnd {
+            selectedRects.removeAll()
+        }
+    }
 }
 
 extension FeedDrawView {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        
+        selectedRects.removeAll()
         guard let touch = touches.first else { return }
         let touchPoint = touch.location(in: self)
         
@@ -74,10 +106,21 @@ extension FeedDrawView {
             showImagePreview(imageUrlString)
         } else {
             if let text = textHitTest(touchPoint) {
-                let alert = UIAlertView(title: text, message: nil, delegate: nil, cancelButtonTitle: "确定")
-                alert.show()
+                print("touch = \(text)")
+//                let alert = UIAlertView(title: text, message: nil, delegate: nil, cancelButtonTitle: "确定")
+//                alert.show()
             }
         }
+    }
+    
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        selectedEnd = true
+        setNeedsDisplay()
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        selectedEnd = true
+        setNeedsDisplay()
     }
     
     // 翻转坐标
@@ -118,60 +161,128 @@ extension FeedDrawView {
         var origins = [CGPoint](repeating: CGPoint.zero, count:lineArray.count)
         CTFrameGetLineOrigins(ctFrame, CFRange(location: 0, length: 0), &origins)
         
-        var touchLine: CTLine?
-        var touchLineOrigin: CGPoint?
+        var tempTouchLine: CTLine?
+        var tempTouchLineOrigin: CGPoint?
         for (i, ctLine) in lineArray.enumerated() {
             // 计算出每个ctLine的rect
-            var ascent: CGFloat = 0
-            var descent: CGFloat = 0
-            let lineWidth = CGFloat(CTLineGetTypographicBounds(ctLine, &ascent, &descent, nil))
-            let lineHeight = ascent + descent
-            let origin = CGPoint(x: 0, y: origins[i].y - descent)
-            let ctLineRect = CGRect(origin: origin, size: CGSize(width: lineWidth, height: lineHeight))
-            
+            let ctLineRect = getLineRect(ctLine, ctLineOrigin: origins[i])
             // 判断当前点击的位置在不在rect内,在的话就退出循环,表示点击的是当前ctLine
             if translateRect(ctLineRect).contains(hitPoint) {
-                touchLine = ctLine
-                touchLineOrigin = origins[i]
+                tempTouchLine = ctLine
+                tempTouchLineOrigin = origins[i]
                 break
             }
         }
         
-        if let touchLine = touchLine, let touchLineOrigin = touchLineOrigin {
-            var touchSuccess = false
-            // 获取点击的ctLine里的每个ctRun
-            if let ctRuns = CTLineGetGlyphRuns(touchLine) as? [CTRun] {
+        guard let touchLine = tempTouchLine, let touchLineOrigin = tempTouchLineOrigin else {
+            return nil
+        }
+        
+        guard let _ = getTouchRun(touchLine, touchLineOrigin: touchLineOrigin, hitPoint: hitPoint) else {
+            return nil
+        }
+        
+        // 获取点击位置的文字在ctLine里是第几个文字
+        let index = CTLineGetStringIndexForPosition(touchLine, hitPoint)
+        guard let touchText = getSpecialText(model, index: index) else {
+            return nil
+        }
+        
+        // 当前点击的特殊文字的range
+        let touchTextRange = getSpecialTextRange(model, index: index)
+        
+        for (i, ctLine) in lineArray.enumerated() {
+            if let ctRuns = CTLineGetGlyphRuns(ctLine) as? [CTRun] {
+                var rects = [CGRect]()
                 for ctRun in ctRuns {
-                    // 计算出每个ctRun的rect
-                    var ascent: CGFloat = 0
-                    var descent: CGFloat = 0
-                    let width = CGFloat(CTRunGetTypographicBounds(ctRun, CFRange(location: 0, length: 0), &ascent, &descent, nil))
-                    var offsetX: CGFloat = 0
-                    CTLineGetOffsetForStringIndex(touchLine, CTRunGetStringRange(ctRun).location, &offsetX)
-                    offsetX = offsetX + touchLineOrigin.x
-                    
-                    let ctRunRect = CGRect(x: offsetX, y: touchLineOrigin.y - descent, width: width, height: ascent + descent)
-                    
-                    // 判断当前点击的位置在不在ctRun上面
-                    if translateRect(ctRunRect).contains(hitPoint) {
-                        touchSuccess = true
-                        break
+                    let range = CTRunGetStringRange(ctRun)
+                    // 这个ctRun的的range是否在点击特殊文字的range上
+                    guard touchTextRange.contains(range.location) else {
+                        continue
                     }
+                    
+                    // 获得当前ctRun的bounds
+                    var rect = CTRunGetImageBounds(ctRun, context, CFRange(location: 0, length: 0))
+                    // y需要加上当前line的y
+                    rect.origin.y += origins[i].y
+                    rects.append(rect)
                 }
-            }
-            
-            if touchSuccess {
-                // 获取点击位置的文字在ctLine里是第几个文字
-                let index = CTLineGetStringIndexForPosition(touchLine, hitPoint)
-                
-                // 遍历所有特殊文字的range,判断当前点击的文字在不在range内
-                for textModel in model.specialTextPartModels {
-                    if index >= textModel.range.location && index <= textModel.range.location + textModel.range.length {
-                        return textModel.text
-                    }
+                if rects.count > 0 {
+                    // 每个ctRun的高度不一样,这里找出最高的ctRun
+                    let maxRect = rects.sorted(by: {$0.height > $1.height}).first!
+                    // 将所有相邻的rect连在一起
+                    let touchLineRect = CGRect(x: rects.first!.minX, y: maxRect.minY, width: rects.last!.maxX - rects.first!.minX, height: maxRect.height)
+                    selectedRects.append(touchLineRect)
                 }
             }
         }
+        if selectedRects.count > 0 {
+            selectedEnd = false
+            setNeedsDisplay()
+        }
+        
+        return touchText
+    }
+}
+
+
+extension FeedDrawView {
+    private func getTouchRun(_ touchLine: CTLine, touchLineOrigin: CGPoint, hitPoint: CGPoint) -> CTRun? {
+        var touchRun: CTRun?
+        // 获取点击的ctLine里的每个ctRun
+        if let ctRuns = CTLineGetGlyphRuns(touchLine) as? [CTRun] {
+            for ctRun in ctRuns {
+                // 计算出每个ctRun的rect
+                let ctRunRect = getRunRect(ctRun, ctLine: touchLine, ctLineOrigin: touchLineOrigin)
+                // 判断当前点击的位置在不在ctRun上面
+                if translateRect(ctRunRect).contains(hitPoint) {
+                    touchRun = ctRun
+                    break
+                }
+            }
+        }
+        return touchRun
+    }
+    
+    private func getLineRect(_ ctLine: CTLine, ctLineOrigin origin: CGPoint) -> CGRect {
+        var ascent: CGFloat = 0
+        var descent: CGFloat = 0
+        let lineWidth = CGFloat(CTLineGetTypographicBounds(ctLine, &ascent, &descent, nil))
+        let lineHeight = ascent + descent
+        let origin = CGPoint(x: 0, y: origin.y - descent)
+        let ctLineRect = CGRect(origin: origin, size: CGSize(width: lineWidth, height: lineHeight))
+        return ctLineRect
+    }
+    
+    private func getRunRect(_ ctRun: CTRun, ctLine: CTLine, ctLineOrigin origin: CGPoint) -> CGRect {
+        var ascent: CGFloat = 0
+        var descent: CGFloat = 0
+        let width = CGFloat(CTRunGetTypographicBounds(ctRun, CFRange(location: 0, length: 0), &ascent, &descent, nil))
+        var offsetX: CGFloat = 0
+        CTLineGetOffsetForStringIndex(ctLine, CTRunGetStringRange(ctRun).location, &offsetX)
+        offsetX = offsetX + origin.x
+        
+        let ctRunRect = CGRect(x: offsetX, y: origin.y - descent, width: width, height: ascent + descent)
+        return ctRunRect
+    }
+    
+    private func getSpecialText(_ model: FeedModel, index: CFIndex) -> String? {
+        // 遍历所有特殊文字的range,判断当前点击的文字在不在range内
+        for textModel in model.specialTextPartModels {
+            if index >= textModel.range.location && index <= textModel.range.location + textModel.range.length {
+                return textModel.text
+            }
+        }
         return nil
+    }
+    
+    private func getSpecialTextRange(_ model: FeedModel, index: CFIndex) -> NSRange {
+        var range = NSRange(location: 0, length: 0)
+        for textModel in model.specialTextPartModels {
+            if index >= textModel.range.location && index <= textModel.range.location + textModel.range.length {
+                range = textModel.range
+            }
+        }
+        return range
     }
 }
