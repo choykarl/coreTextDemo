@@ -16,7 +16,7 @@ class FeedDrawView: UIView {
             setNeedsDisplay()
         }
     }
-    weak var context: CGContext?
+    private weak var context: CGContext?
     private var selectedRects = [CGRect]()
     private var selectedEnd = false
     
@@ -37,6 +37,37 @@ class FeedDrawView: UIView {
             CTFrameDraw(frame, context)
         }
         
+        drawImage(context)
+    }
+    
+    private func drawTouchBackground() {
+        for (i, r) in selectedRects.enumerated() {
+            var path: UIBezierPath!
+            if selectedRects.count == 1 {
+                path = UIBezierPath(roundedRect: r, byRoundingCorners: .allCorners, cornerRadii: CGSize(width: r.height / 2, height: r.height / 2))
+            } else {
+                if i == 0 {
+                    path = UIBezierPath(roundedRect: r, byRoundingCorners: [.topLeft, .bottomLeft], cornerRadii: CGSize(width: r.height / 2, height: r.height / 2))
+                } else if i == selectedRects.count - 1 {
+                    path = UIBezierPath(roundedRect: r, byRoundingCorners: [.topRight, .bottomRight], cornerRadii: CGSize(width: r.height / 2, height: r.height / 2))
+                } else {
+                    path = UIBezierPath(rect: r)
+                }
+            }
+            if selectedEnd {
+                UIColor.clear.setFill()
+            } else {
+                UIColor.red.setFill()
+            }
+            path.fill()
+        }
+        if selectedEnd {
+            selectedRects.removeAll()
+        }
+    }
+    
+    private func drawImage(_ context: CGContext) {
+        guard let model = model else { return }
         var drawImage: UIImage?
         for (i, imageData) in model.drawModel.imageDatas.enumerated() {
             let urlString = imageData.imageUrl
@@ -66,32 +97,6 @@ class FeedDrawView: UIView {
                 UIColor.green.setFill()
                 path.fill()
             }
-        }
-    }
-    
-    private func drawTouchBackground() {
-        for (i, r) in selectedRects.enumerated() {
-            var path: UIBezierPath!
-            if selectedRects.count == 1 {
-                path = UIBezierPath(roundedRect: r, byRoundingCorners: .allCorners, cornerRadii: CGSize(width: r.height / 2, height: r.height / 2))
-            } else {
-                if i == 0 {
-                    path = UIBezierPath(roundedRect: r, byRoundingCorners: [.topLeft, .bottomLeft], cornerRadii: CGSize(width: r.height / 2, height: r.height / 2))
-                } else if i == selectedRects.count - 1 {
-                    path = UIBezierPath(roundedRect: r, byRoundingCorners: [.topRight, .bottomRight], cornerRadii: CGSize(width: r.height / 2, height: r.height / 2))
-                } else {
-                    path = UIBezierPath(rect: r)
-                }
-            }
-            if selectedEnd {
-                UIColor.clear.setFill()
-            } else {
-                UIColor.red.setFill()
-            }
-            path.fill()
-        }
-        if selectedEnd {
-            selectedRects.removeAll()
         }
     }
 }
@@ -281,6 +286,7 @@ extension FeedDrawView {
         for textModel in model.specialTextPartModels {
             if index >= textModel.range.location && index <= textModel.range.location + textModel.range.length {
                 range = textModel.range
+                break
             }
         }
         return range
